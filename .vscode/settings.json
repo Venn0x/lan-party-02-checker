@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "lanpartylib.h": "c",
+        "stdlib.h": "c",
+        "cardlib.h": "c"
+    }
+}
