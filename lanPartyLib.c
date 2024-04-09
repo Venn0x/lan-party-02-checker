@@ -32,13 +32,12 @@ void readTasks(char cerinte[], char date[], char out[]){
         }
     }
 
-    printTeams(head);
+    printTeams(head, out);
     
     fclose(tasksFile);
 }
 
 void processTask1(char pathDate[], Node *head, Node *z) {
-
     FILE* readFile = fopen(pathDate, "r");
     if(readFile == NULL) {
         printf("Could not open file %s", pathDate);
@@ -48,25 +47,19 @@ void processTask1(char pathDate[], Node *head, Node *z) {
     int nrEchipe;
     fscanf(readFile, "%d", &nrEchipe);
     printf("Nr echipe %d\n\n", nrEchipe);
-    Node *iter;
-    iter = head;
 
     for(int i = 0; i < nrEchipe; i++) {
-        Node *nextElem = malloc(sizeof(Node));
+        Node *newElem = malloc(sizeof(Node));
 
         int nrMembrii;
         fscanf(readFile, "%d", &nrMembrii);
 
         char bufferNumeEchipa[30];
         fgets(bufferNumeEchipa, sizeof(bufferNumeEchipa), readFile);
-        //printf(" %d ", strlen(bufferNumeEchipa));
-        //if(bufferNumeEchipa[strlen(bufferNumeEchipa) - 2] == "\n") bufferNumeEchipa[strlen(bufferNumeEchipa) - 2] = "\0";
-        trimNewline(bufferNumeEchipa);
-        removeFirstAndLast(bufferNumeEchipa);
-        char *numeEchipa = malloc(strlen(bufferNumeEchipa) * sizeof(char));
-        if (numeEchipa != NULL) {
-            strcpy(numeEchipa, bufferNumeEchipa);
-        }
+        processFGETS(bufferNumeEchipa);
+        char *numeEchipa = malloc(strlen(bufferNumeEchipa) + 1);
+        strcpy(numeEchipa, bufferNumeEchipa);
+
         Player *players = malloc(nrMembrii * sizeof(Player));
 
         for(int u = 0; u < nrMembrii; u++) {
@@ -75,53 +68,53 @@ void processTask1(char pathDate[], Node *head, Node *z) {
             fscanf(readFile, "%s %s %d", bufferFirstName, bufferLastName, &score);
 
             players[u].firstName = malloc(strlen(bufferFirstName) + 1);
-            if (players[u].firstName != NULL) {
-                strcpy(players[u].firstName, bufferFirstName);
-            }
+            strcpy(players[u].firstName, bufferFirstName);
 
             players[u].secondName = malloc(strlen(bufferLastName) + 1);
-            if (players[u].secondName != NULL) {
-                strcpy(players[u].secondName, bufferLastName);
-            }
+            strcpy(players[u].secondName, bufferLastName);
 
             players[u].points = score;
         }
 
-        nextElem->val.nume = numeEchipa;
-        nextElem->val.nrMembrii = nrMembrii;
-        nextElem->val.players = players;
-        nextElem -> next = iter -> next;
-        iter->next = nextElem;
-        iter = nextElem;
+        newElem->val.nume = numeEchipa;
+        newElem->val.nrMembrii = nrMembrii;
+        newElem->val.players = players;
+        newElem->next = head->next;
+        head->next = newElem;
     }
-            
-    iter->next = z;
 
+    fclose(readFile);
 }
 
-void printTeams (Node *head) {
+
+void printTeams (Node *head, char out[]) {
+    FILE* writeFile = fopen(out, "w");
+    if(writeFile == NULL) {
+        printf("Could not open file %s", writeFile);
+        exit(1);
+    }
     head=head->next;
     while (head->next != head) {
-        for(int i = 0; i < strlen(head->val.nume); i++) {
-            printf("|%c| ", head->val.nume[i]);
-        }
-        printf("\n");
-        ///printf( "%s cu %d membrii\n" , head->val.nume, head->val.nrMembrii );
+       
+        //fprintf(writeFile, "%s cu %d membrii\n" , head->val.nume, head->val.nrMembrii );
+        fprintf(writeFile, "%s\n" , head->val.nume);
         head=head->next;
     }
+
+    fclose(writeFile);
 }
 
-void removeFirstAndLast(char *str) {
+void processFGETS(char *str) {
+
+    trimNewline(str);
+
     int len = strlen(str);
     
-    // Check if the string has at least two characters
     if (len >= 2) {
-        // Shift characters to the left to remove the first character
         for (int i = 0; i < len - 1; i++) {
             str[i] = str[i + 1];
         }
         
-        // Replace the last character with null terminator to effectively remove it
         str[len - 1] = '\0';
     }
 }
